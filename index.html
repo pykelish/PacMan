@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        canvas {
+            background-color: "black";
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <canvas width="2000px" height="3000px" id="my_canvas"></canvas>
+    </center>
+    <script>
+
+        var canvas = document.getElementById('my_canvas');
+        var contexto = canvas.getContext('2d');
+        var dir = 0;
+        var velocidad = 10;
+        var pause = false;
+        var gameOver = false;
+        let paredes = [];
+        let puntos = [];
+        let exoEng = [];
+        let enemigos = [];
+        var score = 0;
+        let imagen_Player = new Image();
+        imagen_Player.src = "cayde.png";
+        let imagen_engLeg = new Image();
+        imagen_engLeg.src = "engrama_legendario.png";
+        let imagen_engExo = new Image();
+        imagen_engExo.src = "engrama_exotico.png";
+        let shank = new Image();
+        shank.src = "shank.png";
+        let sonido_engramaLeg = new Audio();
+        sonido_engramaLeg.src = "sonido_Engrama.mp3";
+        let sonido_engramaExo = new Audio();
+        sonido_engramaExo.src = "sonido_engramaExo.mp3";
+        let shank_kill = new Audio();
+        shank_kill.src = "shank_kill.mp3";
+        let musica = new Audio();
+        musica.src = "musica_ambiente.wav";
+        let posX = 250;
+        let posy = 250;
+
+        musica.play();
+        musica.loop = true;
+        class rectangulo {
+            constructor(x, y, w, h, color) {
+
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = h;
+                this.color = color;
+            }
+
+            pintarRectangulo(contexto) {
+                contexto.strokeStyle = this.color;
+                contexto.lineWidth = 3;
+                contexto.strokeRect(this.x, this.y, this.w, this.h);
+            }
+
+            seTocan(target) {
+                if (this.x < target.x + target.w &&
+                    this.x + this.w > target.x &&
+                    this.y < target.y + target.h &&
+                    this.y + this.h > target.y) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+
+
+        const player = new rectangulo(940, 1400, 100, 100, random_rgba());
+        var contador = 0;
+        n = 0;
+        x = setInterval(function () {
+            console.log(n);
+
+            n++;
+        }, 1000);
+
+
+        document.addEventListener('keydown', (event) => {
+            switch (event.keyCode) {
+                case 87:
+                    if (!pause && score <= 3510) { dir = event.keyCode; }
+                    break;
+                case 83:
+                    if (!pause && score <= 3510) { dir = event.keyCode; }
+                    break;
+                case 65:
+                    if (!pause && score <= 3510) { dir = event.keyCode; }
+                    break;
+                case 68:
+                    if (!pause && score <= 3510) { dir = event.keyCode; }
+                    break;
+                case 32:
+                    pause = !pause;
+                    break;
+            }
+        })
+
+        function update() {
+            if (!pause && score <= 3510) {
+                switch (dir) {
+                    case 87:
+                        player.y -= velocidad;
+                        if (player.y < -50) { player.y = 2600; }
+                        break;
+                    case 83:
+                        player.y += velocidad;
+                        if (player.y > 2600) { player.y = -50; }
+                        break;
+                    case 65:
+                        player.x -= velocidad;
+                        if (player.x < -100) { player.x = 2600; }
+                        break;
+                    case 68:
+                        player.x += velocidad;
+                        if (player.x > 2600) { player.x = -50; }
+                        break;
+                }
+            }
+
+            for (var i = paredes.length - 1; i >= 0; i--) {
+                if (player.seTocan(paredes[i])) {
+                    switch (dir) {
+                        case 87:
+                            player.y += velocidad;
+                            break;
+                        case 83:
+                            player.y -= velocidad;
+                            break;
+                        case 65:
+                            player.x += velocidad;
+                            break;
+                        case 68:
+                            player.x -= velocidad;
+                            break;
+                    }
+                }
+            }
+            repaint();
+            window.requestAnimationFrame(update);
+        }
+        function repaint() {
+            if (score <= 3510) {
+                if (!pause) {
+                    contexto.fillStyle = "black";
+                    contexto.fillRect(0, 0, 2000, 3000);
+                    contexto.font = "80px Arial";
+                    contexto.fillStyle = "white";
+                    contexto.fillText("Score: " + score, 5, 80);
+                    contexto.fillStyle = "white";
+                    contexto.font = "80px Arial"
+                    contexto.fillText("Tiempo: ", 1390, 80);
+                    contexto.fillText(n + " seg", 1690, 80);
+                    player.color = random_rgba();
+                    contexto.drawImage(imagen_Player, player.x, player.y, 100, 100);
+
+
+                    let posX = 100;
+                    for (var i = paredes.length - 1; i >= 0; i--) {
+                        paredes[i].pintarRectangulo(contexto);
+                    }
+                    for (var i = puntos.length - 1; i >= 0; i--) {
+                        puntos[i].pintarRectangulo(contexto);
+                        contexto.drawImage(imagen_engLeg, puntos[i].x, puntos[i].y, 50, 50);
+                    }
+                    for (var i = exoEng.length - 1; i >= 0; i--) {
+                        exoEng[i].pintarRectangulo(contexto);
+                        contexto.drawImage(imagen_engExo, exoEng[i].x, exoEng[i].y, 80, 80);
+                    }
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        enemigos[0].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[0].x, enemigos[0].y, 100, 100);
+                        enemigos[0].x += 5;
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[0].seTocan(paredes[i])) {
+                                enemigos[0].x -= 800;
+                            }
+                        }
+
+                    }
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        enemigos[1].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[1].x, enemigos[1].y, 100, 100);
+                        enemigos[1].x += 5;
+
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[1].seTocan(paredes[i])) {
+                                enemigos[1].x -= 1800;
+                            }
+                        }
+                    }
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        enemigos[2].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[2].x, enemigos[2].y, 100, 100);
+                        enemigos[2].x += 5;
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[2].seTocan(paredes[i])) {
+                                enemigos[2].x -= 800;
+                            }
+                        }
+
+                    }
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        enemigos[3].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[3].x, enemigos[3].y, 100, 100);
+                        enemigos[4].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[4].x, enemigos[4].y, 100, 100);
+                        enemigos[3].x += 5;
+                        enemigos[4].x += 5;
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[3].seTocan(paredes[i])) {
+                                enemigos[3].x -= 800;
+                            }
+                        }
+
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[4].seTocan(paredes[i])) {
+                                enemigos[4].x -= 800;
+                            }
+                        }
+
+                    }
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        enemigos[5].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[5].x, enemigos[5].y, 100, 100);
+                        enemigos[5].x += 5;
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[5].seTocan(paredes[i])) {
+                                enemigos[5].x -= 1050;
+                            }
+                        }
+
+                    }
+
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        enemigos[6].pintarRectangulo(contexto);
+                        contexto.drawImage(shank, enemigos[6].x, enemigos[6].y, 100, 100);
+                        enemigos[6].x += 5;
+
+                        for (var i = paredes.length - 1; i >= 0; i--) {
+                            if (enemigos[6].seTocan(paredes[i])) {
+                                enemigos[6].x -= 1700;
+                            }
+                        }
+                    }
+
+                    for (var i = puntos.length - 1; i >= 0; i--) {
+                        if (player.seTocan(puntos[i])) {
+                            sonido_engramaLeg.play();
+                            score += 10;
+                            puntos[i].x = 3000;
+                        }
+                    }
+
+                    for (var i = exoEng.length - 1; i >= 0; i--) {
+                        if (player.seTocan(exoEng[i])) {
+                            sonido_engramaExo.play();
+                            score += 100;
+                            exoEng[i].x = 3000;
+                        }
+                    }
+
+                    for (var i = enemigos.length - 1; i >= 0; i--) {
+                        if (player.seTocan(enemigos[i])) {
+                            shank_kill.play();
+                            score += 200;
+                            enemigos[i].x = 3000;
+                        }
+                    }
+                } else {
+                    contexto.fillStyle = "rgba(0, 0, 0, 0.025)";
+                    contexto.fillRect(0, 0, 2000, 3000);
+                    contexto.fillStyle = "white";
+                    contexto.font = "100px Arial"
+                    contexto.fillText("P A U S A", 790, 1300);
+                }
+
+
+            } else {                
+                contexto.fillStyle = "rgba(0, 0, 0, 0.025)";
+                contexto.fillRect(0, 0, 2000, 3000);
+                contexto.fillStyle = "white";
+                contexto.font = "100px Arial"
+                contexto.fillText("G A M E  O V E R", 670, 1300);
+            }
+
+        }
+
+
+        function random_rgba() {
+            var o = Math.round, r = Math.random, s = 255;
+            return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',' + r().toFixed(1) + ')';
+        }
+
+        window.requestAnimationFrame = (function () {
+            return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                function (callback) {
+                    window.setTimeout(callback, 17);
+                };
+        }());
+        window.requestAnimationFrame(update);
+        paredes.push(new rectangulo(1, 200, 1998, 50, "blue"));
+        paredes.push(new rectangulo(1, 250, 50, 600, "blue"));
+        paredes.push(new rectangulo(1948, 250, 50, 600, "blue"));
+        paredes.push(new rectangulo(51, 800, 365, 50, "blue"));
+        paredes.push(new rectangulo(1584, 800, 365, 50, "blue"));
+        paredes.push(new rectangulo(975, 250, 50, 200, "blue"));
+        paredes.push(new rectangulo(165, 350, 250, 100, "blue"));
+        paredes.push(new rectangulo(550, 350, 300, 100, "blue"));
+        paredes.push(new rectangulo(1150, 350, 300, 100, "blue"));
+        paredes.push(new rectangulo(1584, 350, 250, 100, "blue"));
+        paredes.push(new rectangulo(165, 570, 250, 50, "blue"));
+        paredes.push(new rectangulo(1584, 570, 250, 50, "blue"));
+        paredes.push(new rectangulo(750, 570, 500, 50, "blue"));
+        paredes.push(new rectangulo(550, 570, 50, 530, "blue"));
+        paredes.push(new rectangulo(1400, 570, 50, 530, "blue"));
+        paredes.push(new rectangulo(365, 850, 50, 250, "blue"));
+        paredes.push(new rectangulo(1584, 850, 50, 250, "blue"));
+        paredes.push(new rectangulo(0, 1050, 365, 50, "blue"));
+        paredes.push(new rectangulo(1634, 1050, 365, 50, "blue"));
+        paredes.push(new rectangulo(0, 1250, 415, 50, "blue"));
+        paredes.push(new rectangulo(1585, 1250, 415, 50, "blue"));
+        paredes.push(new rectangulo(365, 1300, 50, 250, "blue"));
+        paredes.push(new rectangulo(1585, 1300, 50, 250, "blue"));
+        paredes.push(new rectangulo(0, 1550, 415, 50, "blue"));
+        paredes.push(new rectangulo(1585, 1550, 415, 50, "blue"));
+        paredes.push(new rectangulo(0, 1600, 50, 450, "blue"));
+        paredes.push(new rectangulo(1950, 1600, 50, 450, "blue"));
+        paredes.push(new rectangulo(0, 2050, 200, 50, "blue"));
+        paredes.push(new rectangulo(1800, 2050, 200, 50, "blue"));
+        paredes.push(new rectangulo(0, 2100, 50, 450, "blue"));
+        paredes.push(new rectangulo(1950, 2100, 50, 450, "blue"));
+        paredes.push(new rectangulo(1, 2550, 1998, 50, "blue"));
+        paredes.push(new rectangulo(600, 800, 200, 50, "blue"));
+        paredes.push(new rectangulo(1200, 800, 200, 50, "blue"));
+        paredes.push(new rectangulo(980, 620, 50, 230, "blue"));
+        paredes.push(new rectangulo(750, 1020, 500, 300, "blue"));
+        paredes.push(new rectangulo(550, 1250, 50, 350, "blue"));
+        paredes.push(new rectangulo(1400, 1250, 50, 350, "blue"));
+        paredes.push(new rectangulo(750, 1550, 500, 50, "blue"));
+        paredes.push(new rectangulo(980, 1600, 50, 250, "blue"));
+        paredes.push(new rectangulo(750, 2100, 500, 50, "blue"));
+        paredes.push(new rectangulo(980, 2150, 50, 250, "blue"));
+        paredes.push(new rectangulo(550, 1800, 250, 50, "blue"));
+        paredes.push(new rectangulo(1200, 1800, 250, 50, "blue"));
+        paredes.push(new rectangulo(215, 1800, 200, 50, "blue"));
+        paredes.push(new rectangulo(1585, 1800, 200, 50, "blue"));
+        paredes.push(new rectangulo(365, 1850, 50, 250, "blue"));
+        paredes.push(new rectangulo(1585, 1850, 50, 250, "blue"));
+        paredes.push(new rectangulo(215, 2350, 600, 50, "blue"));
+        paredes.push(new rectangulo(1185, 2350, 600, 50, "blue"));
+        paredes.push(new rectangulo(550, 2100, 50, 250, "blue"));
+        paredes.push(new rectangulo(1400, 2100, 50, 250, "blue"));
+        exoEng.push(new rectangulo(80, 1950, 80, 80, "black"));
+        exoEng.push(new rectangulo(1835, 1900, 80, 80, "black"));
+        exoEng.push(new rectangulo(1830, 675, 80, 80, "black"));
+        enemigos.push(new rectangulo(300, 250, 100, 100, "transparent"));
+        enemigos.push(new rectangulo(100, 2435, 100, 100, "transparent"));
+        enemigos.push(new rectangulo(1050, 250, 100, 100, "transparent"));
+        enemigos.push(new rectangulo(1050, 1650, 100, 100, "transparent"));
+        enemigos.push(new rectangulo(100, 1650, 100, 100, "transparent"));
+        enemigos.push(new rectangulo(500, 1930, 100, 100, "transparent"));
+        enemigos.push(new rectangulo(90, 450, 100, 100, "transparent"));
+
+
+
+        posX = 100;
+        for (var i = 0; i <= 22; i++) {
+            puntos.push(new rectangulo(posX, 2450, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 90;
+        for (var i = 0; i <= 10; i++) {
+            puntos.push(new rectangulo(posX, 270, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 1050;
+        for (var i = 0; i <= 10; i++) {
+            puntos.push(new rectangulo(posX, 270, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posY = 340
+        for (var i = 0; i <= 5; i++) {
+            puntos.push(new rectangulo(90, posY, 50, 50, "black"));
+            posY += 70;
+        }
+
+        posX = 170
+        for (var i = 0; i <= 2; i++) {
+            puntos.push(new rectangulo(posX, 690, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 170
+        for (var i = 0; i <= 2; i++) {
+            puntos.push(new rectangulo(posX, 480, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posY = 340
+        for (var i = 0; i <= 27; i++) {
+            puntos.push(new rectangulo(450, posY, 50, 50, "black"));
+            posY += 70;
+        }
+
+        posY = 340
+        for (var i = 0; i <= 27; i++) {
+            puntos.push(new rectangulo(1500, posY, 50, 50, "black"));
+            posY += 70;
+        }
+
+        posX = 550
+        for (var i = 0; i <= 11; i++) {
+            puntos.push(new rectangulo(posX, 480, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 550
+        for (var i = 0; i <= 11; i++) {
+            puntos.push(new rectangulo(posX, 1950, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 1600
+        for (var i = 0; i <= 2; i++) {
+            puntos.push(new rectangulo(posX, 480, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 1590
+        for (var i = 0; i <= 2; i++) {
+            puntos.push(new rectangulo(posX, 690, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posY = 340
+        for (var i = 0; i <= 4; i++) {
+            puntos.push(new rectangulo(1850, posY, 50, 50, "black"));
+            posY += 70;
+        }
+
+        posX = 1090
+        for (var i = 0; i <= 3; i++) {
+            puntos.push(new rectangulo(posX, 690, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 640
+        for (var i = 0; i <= 3; i++) {
+            puntos.push(new rectangulo(posX, 690, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 110
+        for (var i = 0; i <= 3; i++) {
+            puntos.push(new rectangulo(posX, 1670, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 540
+        for (var i = 0; i <= 4; i++) {
+            puntos.push(new rectangulo(posX, 1670, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 1090
+        for (var i = 0; i <= 4; i++) {
+            puntos.push(new rectangulo(posX, 1670, 50, 50, "black"));
+            posX += 80;
+        }
+
+
+        posX = 1600
+        for (var i = 0; i <= 3; i++) {
+            puntos.push(new rectangulo(posX, 1670, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 110
+        for (var i = 0; i <= 3; i++) {
+            puntos.push(new rectangulo(posX, 2230, 50, 50, "black"));
+            posX += 80;
+        }
+
+        posX = 1600
+        for (var i = 0; i <= 3; i++) {
+            puntos.push(new rectangulo(posX, 2230, 50, 50, "black"));
+            posX += 80;
+        }
+
+    </script>
+</body>
+
+</html>
