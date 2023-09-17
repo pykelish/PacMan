@@ -49,8 +49,7 @@
         let posX = 250;
         let posy = 250;
 
-        musica.play();
-        musica.loop = true;
+        
         class rectangulo {
             constructor(x, y, w, h, color) {
 
@@ -89,7 +88,8 @@
             n++;
         }, 1000);
 
-
+        musica.play();
+        musica.loop = true;
         document.addEventListener('keydown', (event) => {
             switch (event.keyCode) {
                 case 87:
