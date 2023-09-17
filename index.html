@@ -88,8 +88,7 @@
             n++;
         }, 1000);
 
-        musica.play();
-        musica.loop = true;
+        
         document.addEventListener('keydown', (event) => {
             switch (event.keyCode) {
                 case 87:
@@ -111,6 +110,8 @@
         })
 
         function update() {
+            musica.play();
+            musica.loop = true;
             if (!pause && score <= 3510) {
                 switch (dir) {
                     case 87:
